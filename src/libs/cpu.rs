@@ -1,5 +1,6 @@
 pub struct CPU {
     pub register_a: u8,
+    pub register_x: u8,
     pub status: u8,
     pub program_counter: u16,
 }
@@ -8,20 +9,22 @@ impl CPU {
     pub fn new() -> Self {
         CPU {
             register_a: 0,
+            register_x: 0,
             status: 0,
             program_counter: 0,
         }
     }
 
     pub fn interpret(&mut self, program: Vec<u8>) {
-        self.program_counter - 0;   // initialize
+        self.program_counter = 0; // initialize
 
         loop {
             let opscode = program[self.program_counter as usize];
             self.program_counter += 1; // increment pc
 
             match opscode {
-                0xA9 => {   // LDA
+                0xA9 => {
+                    // LDA
                     let param = program[self.program_counter as usize];
                     self.program_counter += 1;
                     self.register_a = param;
@@ -38,10 +41,27 @@ impl CPU {
                         self.status = self.status & 0b0111_1111;
                     }
                 }
-                0x00 => {   // BRK
+                0xAA => {
+                    self.register_x = self.register_a;
+
+                    if self.register_x == 0 {
+                        // Zero Flag
+                        self.status = self.status | 0b0000_0010;
+                    } else {
+                        self.status = self.status & 0b1111_1101;
+                    }
+
+                    if self.register_x & 0b1000_0000 != 0 {
+                        // Negative Flag
+                        self.status = self.status | 0b1000_0000;
+                    } else {
+                        self.status = self.status & 0b0111_1111;
+                    }
+                }
+                0x00 => {
                     return;
                 }
-                _ => todo!("not implemented")
+                _ => todo!("not implemented"),
             }
         }
     }
@@ -58,6 +78,15 @@ mod test {
 
         assert_eq!(cpu.register_a, 0x05);
         assert!(cpu.status & 0b0000_0010 == 0b00);
-        assert!(cpu.status & 0b1000_0000 == 0); 
+        assert!(cpu.status & 0b1000_0000 == 0);
+    }
+
+    #[test]
+    fn test_0xaa_tax_move_a_to_x() {
+        let mut cpu = CPU::new();
+        cpu.register_a = 10;
+        cpu.interpret(vec![0xaa, 0x00]); // TAX
+
+        assert_eq!(cpu.register_x, 10);
     }
 }

@@ -27,7 +27,7 @@ impl CPU {
                     // LDA
                     let param = program[self.program_counter as usize];
                     self.program_counter += 1;
-
+                    
                     self.lda(param);
                 }
                 0xAA => self.tax(),

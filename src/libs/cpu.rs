@@ -3,6 +3,7 @@ pub struct CPU {
     pub register_x: u8,
     pub status: u8,
     pub program_counter: u16,
+    memory: [u8; 0xFFFF],
 }
 
 impl CPU {
@@ -12,6 +13,7 @@ impl CPU {
             register_x: 0,
             status: 0,
             program_counter: 0,
+            memory: [0; 0xFFFF],
         }
     }
 
@@ -69,6 +71,48 @@ impl CPU {
             self.status = self.status | 0b1000_0000;
         } else {
             self.status = self.status & 0b0111_1111;
+        }
+    }
+
+    // memory operation
+    fn mem_read(&self, addr: u16) -> u8 {
+        self.memory[addr as usize]
+    }
+
+    fn mem_write(&mut self, addr: u16, data: u8) {
+        self.memory[addr as usize] = data;
+    }
+
+    pub fn load_and_run(&mut self, program: Vec<u8>) {
+        self.load(program);
+        self.run()
+    }
+
+    pub fn load(&mut self, program: Vec<u8>) {
+        self.memory[0x8000..(0x8000 + program.len())].copy_from_slice(&program[..]);
+        self.program_counter = 0x8000;
+    }
+
+    pub fn run(&mut self) {
+        loop {
+            let opscode = self.mem_read(self.program_counter);
+            self.program_counter += 1;
+
+            match opscode {
+                0xA9 => {
+                    // LDA
+                    let param = program[self.program_counter as usize];
+                    self.program_counter += 1;
+
+                    self.lda(param);
+                }
+                0xAA => self.tax(),
+                0xE8 => self.inx(),
+                0x00 => {
+                    return;
+                }
+                _ => todo!("not implemented"),
+            }
         }
     }
 }

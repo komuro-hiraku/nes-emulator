@@ -22,6 +22,7 @@ pub enum AddressingMode {
     NoneAddressing,
 }
 
+
 impl CPU {
     pub fn new() -> Self {
         CPU {

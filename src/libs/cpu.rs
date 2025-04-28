@@ -217,11 +217,29 @@ impl CPU {
                     self.sta(&AddressingMode::ZeroPage_X);
                     self.program_counter += 1;
                 }
+
+
                 0xAA => self.tax(),
                 0xE8 => self.inx(),
-                0x00 => {
-                    return;
-                }
+                0x00 => return,
+
+                /* CLD 0xD8 */
+                /* CLI 0x58 */
+                /* CLV 0xB8 */
+                /* CLC 0x18 */
+                /* SEC 0x38 */
+                /* SEI 0x78 */
+                /* SED 0xF8 */
+                /* PHA 0x48 */
+                /* PLA 0x68 */
+                /* PHP 0x08 */
+                /* PLP 0x28 */
+                /* ADC 0x69 | 0x65 | 0x75 | 0x6D | 0x7D | 0x79 | 0x61 | 0x71 */
+                /* SBC 0xE9 | 0xE5 | 0xF5 | 0xED | 0xFD | 0xF9 | 0xE1 | 0xF1 */
+                /* AND 0x29 | 0x25 | 0x35 | 0x2D | 0x3D | 0x39 | 0x21 | 0x31 */
+                /* EOR 0x49 | 0x45 | 0x55 | 0x4D | 0x5D | 0x59 | 0x41 | 0x51 */
+                /* ORA 0x09 | 0x05 | 0x15 | 0x0D | 0x1D | 0x19 | 0x01 | 0x11 */
+
                 _ => todo!("not implemented"),
             }
         }
